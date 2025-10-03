@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Conversational Voice Chatbot - Real-time VAD</title>
+        <link rel="stylesheet" href="styles.css?v=20251003001100">
+    <style>
+        /* VAD-specific styles */
+        .vad-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .vad-section h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .vad-indicators {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .vad-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .vad-indicator.active {
+            background: #e8f5e8;
+            border-color: #4CAF50;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+        }
+        
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            transition: background-color 0.3s ease;
+        }
+        
+        .vad-indicator.active .indicator-dot {
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
+        
+        .vad-indicator span:last-child {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .audio-level {
+            margin-top: 10px;
+        }
+        
+        .audio-level-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .audio-level-bar::after {
+            content: '';
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #FFC107, #FF9800, #F44336);
+            transition: width 0.1s ease;
+        }
+        
+        #audioLevelText {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .conversation-status {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .conversation-status.active {
+            background: rgba(76, 175, 80, 0.9);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .status.recording {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status.listening {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status.processing {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .status.ai-speaking {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .record-button {
+            font-size: 18px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .record-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .record-button:active {
+            transform: translateY(0);
+        }
+        
+        .message.system {
+            background: #fff3e0;
+            border-left: 4px solid #FF9800;
+        }
+        
+        .message.system .message-icon {
+            background: #FF9800;
+        }
+        
+        .tech-info {
+            margin-top: 10px;
+            padding: 8px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            border-left: 3px solid #2196F3;
+        }
+        
+        .tech-info small {
+            color: #1976d2;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ Conversational Voice Chatbot</h1>
+            <p>Natural voice conversation with automatic voice detection</p>
+        </header>
+        
+        <div id="conversationStatus" class="conversation-status">
+            Ready to start conversation
+        </div>
+        
+        <div class="chat-container">
+            <div id="chatContainer" class="chat-messages">
+                <div class="message assistant system">
+                    <div class="message-header">
+                        <span class="message-icon">🤖</span>
+                        <span class="message-sender">AI Assistant</span>
+                        <span class="message-time">Now</span>
+                        <span style="color: #FF9800; font-size: 0.8em;">ℹ️ System</span>
+                    </div>
+                    <div class="message-content">
+                        Welcome! I'm your conversational AI assistant. Click "Start Conversation" to begin, then just speak naturally. 
+                        I'll automatically detect when you're talking and respond with voice. No need to click buttons during our conversation!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="recordButton" class="record-button">
+                    🎤 Start Conversation
+                </button>
+                <div id="status" class="status info">
+                    Ready to start conversation
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <script src="script_no_ffmpeg.js?v=20251003001100"></script>
+</body>
+</html>

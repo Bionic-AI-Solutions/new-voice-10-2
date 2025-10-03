@@ -1,0 +1,73 @@
+_format_version: "3.0"
+
+services:
+  - name: local-llm-service
+    url: http://ollama:11434/api/chat
+    routes:
+      - name: local-llm-route
+        paths:
+          - /v1/chat/completions
+        methods:
+          - POST
+        strip_path: true
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Accept-Version
+            - Content-Length
+            - Content-MD5
+            - Content-Type
+            - Date
+            - X-Auth-Token
+            - Authorization
+          exposed_headers:
+            - X-Auth-Token
+          credentials: true
+          max_age: 3600
+          preflight_continue: false
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+          policy: local
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - "Content-Type:application/json"
+          remove:
+            headers:
+              - "Content-Type"
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "Access-Control-Allow-Origin:*"
+              - "Access-Control-Allow-Methods:GET, POST, PUT, DELETE, OPTIONS"
+              - "Access-Control-Allow-Headers:Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Auth-Token, Authorization"
+          remove:
+            headers:
+              - "Server"
+
+consumers:
+  - username: voice-chatbot
+    custom_id: voice-chatbot-client
+    keyauth_credentials:
+      - key: your-kong-api-key
+
+plugins:
+  - name: key-auth
+    config:
+      key_names:
+        - apikey
+      hide_credentials: false
