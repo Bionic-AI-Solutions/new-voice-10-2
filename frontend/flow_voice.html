@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Voice AI - Agent Conversation</title>
+    <link rel="stylesheet" href="flow_voice_styles.css?v=20251003002000">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🤖 Flow Voice AI</h1>
+            <p>Agent-based conversational voice interface powered by Speechmatics Flow API</p>
+            
+            <!-- Navigation -->
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Real-time Chat</a>
+                <a href="flow_voice.html" class="nav-link active">Flow Voice AI</a>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <!-- Status Panel -->
+            <div class="status-panel">
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-dot disconnected"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+                <div class="session-info" id="sessionInfo" style="display: none;">
+                    <span>Session: <span id="sessionId">-</span></span>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <button id="startFlowBtn" class="btn btn-primary">
+                    🚀 Start Flow Conversation
+                </button>
+                <button id="endFlowBtn" class="btn btn-secondary" disabled>
+                    🔚 End Conversation
+                </button>
+                <button id="clearChatBtn" class="btn btn-outline">
+                    🗑️ Clear Chat
+                </button>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">
+                        <div class="message-content">
+                            <strong>System:</strong> Ready to start a Flow Voice AI conversation. Click "Start Flow Conversation" to begin.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Input Panel -->
+            <div class="text-input-panel">
+                <div class="input-group">
+                    <input type="text" id="textInput" placeholder="Type a message or use voice..." disabled>
+                    <button id="sendTextBtn" class="btn btn-primary" disabled>Send</button>
+                </div>
+                <div class="input-options">
+                    <label>
+                        <input type="checkbox" id="interruptResponse"> Interrupt Response
+                    </label>
+                    <label>
+                        <input type="checkbox" id="immediateInput"> Immediate Input
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tool Results Panel -->
+            <div class="tool-panel" id="toolPanel" style="display: none;">
+                <h3>🔧 Tool Execution</h3>
+                <div class="tool-content" id="toolContent">
+                    <!-- Tool execution results will appear here -->
+                </div>
+            </div>
+
+            <!-- Audio Controls -->
+            <div class="audio-controls">
+                <div class="audio-status">
+                    <span class="audio-indicator" id="audioIndicator">🎤</span>
+                    <span class="audio-text" id="audioText">Ready to listen</span>
+                </div>
+                <div class="audio-level">
+                    <div class="level-bar">
+                        <div class="level-fill" id="levelFill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Panel (collapsible) -->
+        <div class="debug-panel">
+            <button class="debug-toggle" id="debugToggle">🐛 Debug Info</button>
+            <div class="debug-content" id="debugContent" style="display: none;">
+                <div class="debug-section">
+                    <h4>Connection Status</h4>
+                    <div id="connectionStatus">Disconnected</div>
+                </div>
+                <div class="debug-section">
+                    <h4>Session Info</h4>
+                    <div id="sessionDebug">No active session</div>
+                </div>
+                <div class="debug-section">
+                    <h4>Recent Messages</h4>
+                    <div id="messageLog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="flow_voice_script.js?v=20251003002000"></script>
+</body>
+</html>

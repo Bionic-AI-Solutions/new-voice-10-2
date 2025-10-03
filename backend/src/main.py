@@ -18,6 +18,8 @@ from websockets.server import WebSocketServerProtocol
 from .core.config import settings
 from .core.database import init_db, close_db
 from .services.speechmatics_service import streaming_websocket_handler
+from .services.flow_voice_service import FlowVoiceService
+from .websocket.flow_websocket_handler import FlowWebSocketHandler
 from .services.ai_chatbot_service import ai_chatbot_service
 from .services.tts_service import tts_service
 from .api import router as api_router
@@ -44,6 +46,14 @@ async def lifespan(app: FastAPI):
     # Initialize WebSocket manager
     app.state.websocket_manager = WebSocketManager()
     logger.info("WebSocket manager initialized")
+    
+    # Initialize Flow Voice service
+    app.state.flow_voice_service = FlowVoiceService(
+        api_key=settings.speechmatics_api_key,
+        region=settings.speechmatics_region
+    )
+    app.state.flow_websocket_handler = FlowWebSocketHandler(app.state.flow_voice_service)
+    logger.info("Flow Voice service initialized")
     
     # WebSocket endpoints are handled by FastAPI directly
     logger.info("WebSocket endpoints ready")
@@ -247,6 +257,12 @@ async def websocket_chat(websocket: WebSocket, user_id: str):
     await streaming_websocket_handler.handle_streaming_connection(
         websocket, user_id
     )
+
+
+@app.websocket("/ws/flow/{session_id}")
+async def websocket_flow_voice(websocket: WebSocket, session_id: str):
+    """WebSocket endpoint for Flow Voice AI agent conversations."""
+    await app.state.flow_websocket_handler.handle_flow_connection(websocket, session_id)
 
 
 if __name__ == "__main__":
